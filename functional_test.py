@@ -6,6 +6,8 @@ import time
 
 import files_db
 
+IP_ADDRESS = 'http://127.0.0.1:5000'
+
 class FunctionalTest(unittest.TestCase):
     '''Хранилище файлов с доступом по http'''
 
@@ -17,7 +19,7 @@ class FunctionalTest(unittest.TestCase):
             files_db.create_db
         with open('second_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('second_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download)
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download)
 
     def tearDown(self):
         try:
@@ -48,7 +50,7 @@ class FunctionalTest(unittest.TestCase):
         '''
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         file_hash = response.json()['hash']
         file_name = files_db.get_name_using_hash(file_hash)
 
@@ -71,7 +73,7 @@ class FunctionalTest(unittest.TestCase):
         '''
         test_file_hash = files_db.get_all_file_hashes()
 
-        response = requests.get(f"http://127.0.0.1:5000/download/{test_file_hash}")
+        response = requests.get(IP_ADDRESS + f"/download/{test_file_hash}")
         file_name = response.headers.get('content-disposition')[21:]
         
         directory_name = file_name[:2]
@@ -90,7 +92,7 @@ class FunctionalTest(unittest.TestCase):
         self.assertEqual(len(existing_files), 1)
         self.assertEqual(text, 'some test some file 2\n')
 
-        response = requests.get("http://127.0.0.1:5000/download/1a2b3c")
+        response = requests.get(IP_ADDRESS + "/download/1a2b3c")
         self.assertEqual(response.text, 'file_not_found')
 
     def test_delete_file(self):
@@ -102,14 +104,14 @@ class FunctionalTest(unittest.TestCase):
         existing_files_before = os.listdir('store/'+test_file_hash[0][:2])
         test_file_hash_before = files_db.get_all_file_hashes()
 
-        response = requests.delete(f"http://127.0.0.1:5000/delete/{test_file_hash}")
+        response = requests.delete(IP_ADDRESS + f"/delete/{test_file_hash}")
         
         existing_files_after = os.listdir('store/'+test_file_hash[0][:2])
         test_file_hash_after = files_db.get_all_file_hashes()
         self.assertEqual(len(test_file_hash_before) -1, len(test_file_hash_after))
         self.assertEqual(len(existing_files_before) -1, len(existing_files_after))
 
-        response = requests.delete("http://127.0.0.1:5000/delete/1a2b3c")
+        response = requests.delete(IP_ADDRESS + "/delete/1a2b3c")
         self.assertEqual(response.text, 'file not found')
 
 if __name__ == '__main__':

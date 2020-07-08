@@ -7,6 +7,8 @@ import app
 
 import files_db
 
+IP_ADDRESS = 'http://127.0.0.1:5000'
+
 class UploadTest(unittest.TestCase):
     '''тест загрузки файлов на сервер'''
 
@@ -30,19 +32,19 @@ class UploadTest(unittest.TestCase):
             print(e)
         
     def test_request_without_file_return_error_message(self):
-        response = requests.post("http://127.0.0.1:5000/upload") 
+        response = requests.post(IP_ADDRESS + "/upload") 
         self.assertEqual(response.text, 'No files to download')
 
     def test_request_with_file_return_200(self):
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         self.assertEqual(response.status_code, 200)
 
     def test_after_downloading_file_create_database_entry(self):
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         file_hash = response.json()['hash']
 
         data = files_db.get_all_file_names()
@@ -55,7 +57,7 @@ class UploadTest(unittest.TestCase):
     def test_after_correct_request_create_directory(self):
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         file_hash = response.json()['hash']
         
         directory_names = os.listdir('store/')
@@ -64,14 +66,14 @@ class UploadTest(unittest.TestCase):
     def test_directory_with_correct_name_exist_dont_create_new(self):
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         directory_names = os.listdir('store/')
         self.assertEqual(len(directory_names), 1)
         
     def test_request_with_file_return_hash_of_created_file(self):
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
 
         file_hash = response.json()['hash']
         file_name = files_db.get_name_using_hash(file_hash)
@@ -84,11 +86,11 @@ class UploadTest(unittest.TestCase):
     def test_if_hash_already_in_db_return_error_message(self):
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
 
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download) 
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
 
         self.assertEqual(response.text, 'this file already exist')
 
@@ -102,7 +104,7 @@ class DownloadTest(unittest.TestCase):
             pass
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download)
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download)
         
     def tearDown(self):
         try:
@@ -117,24 +119,24 @@ class DownloadTest(unittest.TestCase):
             print(e)
 
     def test_request_without_hash_return_404(self):
-        response = requests.get("http://127.0.0.1:5000/download/")
+        response = requests.get(IP_ADDRESS + "/download/")
         self.assertEqual(response.status_code, 404)
 
     def test_request_with_bad_hash_return_error_message(self):
-        response = requests.get("http://127.0.0.1:5000/download/1a2b3c")
+        response = requests.get(IP_ADDRESS + "/download/1a2b3c")
         self.assertEqual(response.text, 'file_not_found')
 
     def test_correct_request_with_hash_return_file(self):
         test_file_hash = files_db.get_all_file_hashes()
             
-        response = requests.get(f"http://127.0.0.1:5000/download/{test_file_hash}")
+        response = requests.get(IP_ADDRESS + f"/download/{test_file_hash}")
         file_name = response.headers.get('content-disposition')[21:]
         self.assertEqual(file_name, 'first_test_file.txt')
 
     def test_correct_request_with_hash_return_and_download_file(self):
         test_file_hash = files_db.get_all_file_hashes()
 
-        response = requests.get(f"http://127.0.0.1:5000/download/{test_file_hash}")
+        response = requests.get(IP_ADDRESS + f"/download/{test_file_hash}")
         file_name = response.headers.get('content-disposition')[21:]
 
         directory_name = file_name[:2]
@@ -151,7 +153,7 @@ class DownloadTest(unittest.TestCase):
     def test_in_downloaded_file_correct_data(self):
         test_file_hash = files_db.get_all_file_hashes()
 
-        response = requests.get(f"http://127.0.0.1:5000/download/{test_file_hash}")
+        response = requests.get(IP_ADDRESS + f"/download/{test_file_hash}")
         file_name = response.headers.get('content-disposition')[21:]
         
         directory_name = file_name[:2]
@@ -175,7 +177,7 @@ class DeleteTest(unittest.TestCase):
             pass
         with open('first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
-        response = requests.post("http://127.0.0.1:5000/upload", files=file_to_download)
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download)
     def tearDown(self):
         try:
             files_db.drop_db()
@@ -189,23 +191,23 @@ class DeleteTest(unittest.TestCase):
             print(e)
 
     def test_request_without_hash_return_404(self):
-        response = requests.delete("http://127.0.0.1:5000/delete/")
+        response = requests.delete(IP_ADDRESS + "/delete/")
         self.assertEqual(response.status_code, 404)
     
     def test_request_with_bad_hash_return_error_message(self):
-        response = requests.delete("http://127.0.0.1:5000/delete/1a2b3c")
+        response = requests.delete(IP_ADDRESS + "/delete/1a2b3c")
         self.assertEqual(response.text, 'file not found')
 
     def test_correct_request_with_hash_return_message(self):
         test_file_hash = files_db.get_all_file_hashes()[0]
-        response = requests.delete(f"http://127.0.0.1:5000/delete/{test_file_hash}")
+        response = requests.delete(IP_ADDRESS + f"/delete/{test_file_hash}")
         self.assertEqual(response.text, 'file was deleted')
 
     def test_correct_request_with_hash_delete_file(self):
         test_file_hash = files_db.get_all_file_hashes()
         existing_files_before = os.listdir('store/'+test_file_hash[0][:2])
 
-        response = requests.delete(f"http://127.0.0.1:5000/delete/{test_file_hash}")
+        response = requests.delete(IP_ADDRESS + f"/delete/{test_file_hash}")
         
         existing_files_after = os.listdir('store/'+test_file_hash[0][:2])
         self.assertEqual(len(existing_files_before) -1, len(existing_files_after))
@@ -213,7 +215,7 @@ class DeleteTest(unittest.TestCase):
     def test_correct_request_with_hash_delete_data_in_database(self):
         test_file_hash_before = files_db.get_all_file_hashes()
 
-        response = requests.delete(f"http://127.0.0.1:5000/delete/{test_file_hash_before}")
+        response = requests.delete(IP_ADDRESS + f"/delete/{test_file_hash_before}")
         
         test_file_hash_after = files_db.get_all_file_hashes()
         self.assertEqual(len(test_file_hash_before) -1, len(test_file_hash_after))
