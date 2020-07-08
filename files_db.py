@@ -3,7 +3,6 @@ import sqlite3
 def create_db():
     conn = sqlite3.connect('files_and_hash.db')
     cursor = conn.cursor()
-
     req = 'CREATE TABLE files_and_hash (file_name text, file_hash text, path_to_file text)'
     cursor.execute(req)
 
@@ -34,7 +33,6 @@ def get_all_file_names():
 def insert_file_name_and_hash(file_name, file_hash, path_to_file):
     conn = sqlite3.connect('files_and_hash.db')
     cursor = conn.cursor()
-
     cursor.execute('INSERT INTO files_and_hash (file_name, file_hash, path_to_file) VALUES (?, ?, ?)', (file_name, file_hash, path_to_file))
     conn.commit()
 

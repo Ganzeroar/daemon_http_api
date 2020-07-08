@@ -3,8 +3,8 @@ from unittest.mock import patch
 import requests
 import os
 import shutil
-import app
 
+import app
 import files_db
 
 IP_ADDRESS = 'http://127.0.0.1:5000'
