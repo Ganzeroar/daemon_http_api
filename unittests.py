@@ -36,13 +36,13 @@ class UploadTest(unittest.TestCase):
         self.assertEqual(response.text, 'No files to download')
 
     def test_request_with_file_return_200(self):
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         self.assertEqual(response.status_code, 200)
 
     def test_after_downloading_file_create_database_entry(self):
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         file_hash = response.json()['hash']
@@ -55,7 +55,7 @@ class UploadTest(unittest.TestCase):
         self.assertIn('first_test_file.txt', existing_files)
 
     def test_after_correct_request_create_directory(self):
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         file_hash = response.json()['hash']
@@ -64,14 +64,14 @@ class UploadTest(unittest.TestCase):
         self.assertEqual(file_hash[:2], directory_names[0])
 
     def test_directory_with_correct_name_exist_dont_create_new(self):
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         directory_names = os.listdir('store/')
         self.assertEqual(len(directory_names), 1)
         
     def test_request_with_file_return_hash_of_created_file(self):
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
 
@@ -84,11 +84,11 @@ class UploadTest(unittest.TestCase):
         self.assertIn(file_name, created_file)
     
     def test_if_hash_already_in_db_return_error_message(self):
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
 
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
 
@@ -102,7 +102,7 @@ class DownloadTest(unittest.TestCase):
             files_db.create_db()
         except:
             pass
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download)
         
@@ -175,7 +175,7 @@ class DeleteTest(unittest.TestCase):
             files_db.create_db()
         except:
             pass
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download)
     def tearDown(self):

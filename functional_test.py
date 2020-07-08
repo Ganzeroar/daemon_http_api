@@ -17,7 +17,7 @@ class FunctionalTest(unittest.TestCase):
         except:
             files_db.drop_db()
             files_db.create_db
-        with open('second_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/second_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('second_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download)
 
@@ -48,7 +48,7 @@ class FunctionalTest(unittest.TestCase):
             где "abcdef12345..." - имя файла, совпадающее с его хэшем.
             /ab/ - подкаталог, состоящий из первых двух символов хэша файла.
         '''
-        with open('first_test_file.txt', 'rb') as df:
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
         response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
         file_hash = response.json()['hash']
