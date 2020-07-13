@@ -3,6 +3,7 @@ from unittest.mock import patch
 import requests
 import os
 import shutil
+import time
 
 import app
 import files_db
@@ -28,6 +29,13 @@ class UploadTest(unittest.TestCase):
             if existing_directory:
                 for x in existing_directory:
                     shutil.rmtree(current_path+x)
+
+            current_path = str(os.getcwd()) + '/for_unit_tests/'
+            existing_directory = os.listdir(current_path)
+            if existing_directory:
+                for x in existing_directory:
+                    os.remove(current_path+x)
+
         except Exception as e:
             print(e)
         
@@ -83,6 +91,29 @@ class UploadTest(unittest.TestCase):
         created_file = os.listdir('store/'+created_directory)
         self.assertIn(file_name, created_file)
     
+    def test_second_request_with_same_filename_as_first_create_second_file(self):
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
+            file_to_download = {'file' : ('first_test_file.txt', df.read())}
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
+
+        time.sleep(1)
+
+        with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
+            file_to_download = {'file' : ('first_test_file.txt', df.read())}
+        response = requests.post(IP_ADDRESS + "/upload", files=file_to_download) 
+
+        file_counter = 0
+        directory_names = os.listdir('store/')
+        if len(directory_names) == 1:
+            created_directory = directory_names[0]
+            created_files = os.listdir('store/'+created_directory)
+            file_counter += len(created_files)
+        elif len(directory_names) == 2:
+            for directory in directory_names:
+                created_files = os.listdir('store/'+directory)
+                file_counter += len(created_files)
+        self.assertEqual(2, file_counter)
+
     def test_if_hash_already_in_db_return_error_message(self):
         with open('txt_files_for_test/first_test_file.txt', 'rb') as df:
             file_to_download = {'file' : ('first_test_file.txt', df.read())}
@@ -115,6 +146,13 @@ class DownloadTest(unittest.TestCase):
             if existing_directory:
                 for x in existing_directory:
                     shutil.rmtree(current_path+x)
+
+            current_path = str(os.getcwd()) + '/for_unit_tests/'
+            existing_directory = os.listdir(current_path)
+            if existing_directory:
+                for x in existing_directory:
+                    os.remove(current_path+x)
+
         except Exception as e:
             print(e)
 
@@ -187,6 +225,13 @@ class DeleteTest(unittest.TestCase):
             if existing_directory:
                 for x in existing_directory:
                     shutil.rmtree(current_path+x)
+
+            current_path = str(os.getcwd()) + '/for_unit_tests/'
+            existing_directory = os.listdir(current_path)
+            if existing_directory:
+                for x in existing_directory:
+                    os.remove(current_path+x)
+
         except Exception as e:
             print(e)
 
